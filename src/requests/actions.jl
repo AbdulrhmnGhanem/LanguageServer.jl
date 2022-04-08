@@ -102,16 +102,16 @@ function expand_inline_func(x, server, conn)
     if headof(body) == :block && length(body) == 1
         file, offset = get_file_loc(func)
         tde = TextDocumentEdit(VersionedTextDocumentIdentifier(file._uri, file._version), TextEdit[
-            TextEdit(Range(file, offset .+ (0:func.fullspan)), string("function ", get_text(file)[offset .+ (1:sig.span)], "\n    ", get_text(file)[offset + sig.fullspan + op.fullspan .+ (1:body.span)], "\nend\n"))
+            TextEdit(Range(file, offset .+ (0:func.fullspan)), string("function ", get_text(file)[offset.+(1:sig.span)], "\n    ", get_text(file)[offset+sig.fullspan+op.fullspan.+(1:body.span)], "\nend\n"))
         ])
         JSONRPC.send(conn, workspace_applyEdit_request_type, ApplyWorkspaceEditParams(missing, WorkspaceEdit(missing, TextDocumentEdit[tde])))
     elseif (headof(body) === :begin || CSTParser.isbracketed(body)) &&
-        headof(body.args[1]) === :block && length(body.args[1]) > 0
+           headof(body.args[1]) === :block && length(body.args[1]) > 0
         file, offset = get_file_loc(func)
-        newtext = string("function ", get_text(file)[offset .+ (1:sig.span)])
+        newtext = string("function ", get_text(file)[offset.+(1:sig.span)])
         blockoffset = offset + sig.fullspan + op.fullspan + body.trivia[1].fullspan
         for i = 1:length(body.args[1].args)
-            newtext = string(newtext, "\n    ", get_text(file)[blockoffset .+ (1:body.args[1].args[i].span)])
+            newtext = string(newtext, "\n    ", get_text(file)[blockoffset.+(1:body.args[1].args[i].span)])
             blockoffset += body.args[1].args[i].fullspan
         end
         newtext = string(newtext, "\nend\n")
@@ -142,9 +142,9 @@ function get_next_line_offset(x)
     # get next line after using_stmt
     insertpos = -1
     line_offsets = get_line_offsets(file)
-    for i = 1:length(line_offsets) - 1
-        if line_offsets[i] < offset + x.span <= line_offsets[i + 1]
-            insertpos = line_offsets[i + 1]
+    for i = 1:length(line_offsets)-1
+        if line_offsets[i] < offset + x.span <= line_offsets[i+1]
+            insertpos = line_offsets[i+1]
         end
     end
     return insertpos
@@ -257,12 +257,12 @@ function remove_farg_name(x, server, conn)
     file, offset = get_file_loc(x1)
     if CSTParser.isdeclaration(x1)
         tde = TextDocumentEdit(VersionedTextDocumentIdentifier(file._uri, file._version), TextEdit[
-                        TextEdit(Range(file, offset .+ (0:x1.args[1].fullspan)), "")
-                    ])
+            TextEdit(Range(file, offset .+ (0:x1.args[1].fullspan)), "")
+        ])
     else
         tde = TextDocumentEdit(VersionedTextDocumentIdentifier(file._uri, file._version), TextEdit[
-                        TextEdit(Range(file, offset .+ (0:x1.fullspan)), "::Any")
-                    ])
+            TextEdit(Range(file, offset .+ (0:x1.fullspan)), "::Any")
+        ])
     end
     JSONRPC.send(conn, workspace_applyEdit_request_type, ApplyWorkspaceEditParams(missing, WorkspaceEdit(missing, TextDocumentEdit[tde])))
 end
@@ -272,17 +272,17 @@ end
 # * a function (.when) called on the currently selected expression and parameters of the CodeAction call;
 # * a function (.handler) called on three arguments (current expression, server and the jr connection) to implement the command.
 const LSActions = Dict(
-    "ExplicitPackageVarImport" => ServerAction(Command("Explicitly import used package variables.", "ExplicitPackageVarImport", missing), 
-                                               (x, params) -> refof(x) isa StaticLint.Binding && refof(x).val isa SymbolServer.ModuleStore, 
-                                               explicitly_import_used_variables),
+    "ExplicitPackageVarImport" => ServerAction(Command("Explicitly import used package variables.", "ExplicitPackageVarImport", missing),
+        (x, params) -> refof(x) isa StaticLint.Binding && refof(x).val isa SymbolServer.ModuleStore,
+        explicitly_import_used_variables),
     "ExpandFunction" => ServerAction(Command("Expand function definition.", "ExpandFunction", missing),
-                                     (x, params) -> is_in_fexpr(x, is_single_line_func),
-                                     expand_inline_func),
+        (x, params) -> is_in_fexpr(x, is_single_line_func),
+        expand_inline_func),
     "FixMissingRef" => ServerAction(Command("Fix missing reference", "FixMissingRef", missing),
-                                    (x, params) -> is_fixable_missing_ref(x, params.context),
-                                    applymissingreffix),
-    "ReexportModule" => ServerAction(Command("Re-export package variables.", "ReexportModule", missing), 
-                                     (x, params) -> StaticLint.is_in_fexpr(x, x -> headof(x) === :using || headof(x) === :import) && (refof(x) isa StaticLint.Binding && (refof(x).type === StaticLint.CoreTypes.Module || (refof(x).val isa StaticLint.Binding && refof(x).val.type === StaticLint.CoreTypes.Module) || refof(x).val isa SymbolServer.ModuleStore) || refof(x) isa SymbolServer.ModuleStore),
-                                     reexport_package),
+        (x, params) -> is_fixable_missing_ref(x, params.context),
+        applymissingreffix),
+    "ReexportModule" => ServerAction(Command("Re-export package variables.", "ReexportModule", missing),
+        (x, params) -> StaticLint.is_in_fexpr(x, x -> headof(x) === :using || headof(x) === :import) && (refof(x) isa StaticLint.Binding && (refof(x).type === StaticLint.CoreTypes.Module || (refof(x).val isa StaticLint.Binding && refof(x).val.type === StaticLint.CoreTypes.Module) || refof(x).val isa SymbolServer.ModuleStore) || refof(x) isa SymbolServer.ModuleStore),
+        reexport_package),
     "DeleteUnusedFunctionArgumentName" => ServerAction(Command("Delete name of unused function argument.", "DeleteUnusedFunctionArgumentName", missing), (x, params) -> StaticLint.is_in_fexpr(x, x -> StaticLint.haserror(x) && StaticLint.errorof(x) == StaticLint.UnusedFunctionArgument), remove_farg_name)
 )

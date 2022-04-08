@@ -67,7 +67,7 @@ end
             empty!(server._documents)
             LanguageServer.load_folder(dirname(String(first(methods(LanguageServer.eval)).file)), server)
             on_all_docs(server, doc -> begin
-                @info "Testing LS functionality at all offsets" file=doc._uri
+                @info "Testing LS functionality at all offsets" file = doc._uri
                 on_all_offsets(doc, function (doc, offset)
                     tdi = LanguageServer.TextDocumentIdentifier(doc._uri)
                     pos = LanguageServer.Position(LanguageServer.get_position_at(doc, offset)...)
@@ -82,8 +82,8 @@ end
             end)
 
             on_all_docs(server, doc -> begin
-                symbols=length(LanguageServer.textDocument_documentSymbol_request(LanguageServer.DocumentSymbolParams(LanguageServer.TextDocumentIdentifier(doc._uri),missing, missing), server, server.jr_endpoint))
-                @info "Found $symbols symbols" file=doc._uri
+                symbols = length(LanguageServer.textDocument_documentSymbol_request(LanguageServer.DocumentSymbolParams(LanguageServer.TextDocumentIdentifier(doc._uri), missing, missing), server, server.jr_endpoint))
+                @info "Found $symbols symbols" file = doc._uri
             end)
 
             LanguageServer.workspace_symbol_request(LanguageServer.WorkspaceSymbolParams("", missing, missing), server, server.jr_endpoint)

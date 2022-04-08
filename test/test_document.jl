@@ -46,14 +46,14 @@ d5 = Document("untitled", s5, false)
 
 s6 = "\n"
 d6 = Document("untitled", s6, false)
-@test get_line_offsets(d6) == [0,1]
+@test get_line_offsets(d6) == [0, 1]
 
 @testset "applytextdocumentchanges" begin
     doc = LS.Document("file:///example/path/example.jl", "function foo()", false)
     c1 = LS.TextDocumentContentChangeEvent(LS.Range(LS.Position(0, 14), LS.Position(0, 14)),
-                                        0, "\n")
+        0, "\n")
     c2 = LS.TextDocumentContentChangeEvent(LS.Range(LS.Position(1, 0), LS.Position(1, 0)),
-                                           0, "    ")
+        0, "    ")
     c3 = LS.TextDocumentContentChangeEvent(missing, missing, "println(\"Hello World\")")
 
     LS.applytextdocumentchanges(doc, c1)

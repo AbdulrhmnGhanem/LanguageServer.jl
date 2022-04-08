@@ -136,7 +136,7 @@ function get_preceding_docs(expr::EXPR, documentation)
     end
 end
 
-ensure_ends_with(s, c = "\n") = endswith(s, c) ? s : string(s, c)
+ensure_ends_with(s, c="\n") = endswith(s, c) ? s : string(s, c)
 
 binding_has_preceding_docs(b::StaticLint.Binding) = expr_has_preceding_docs(b.val)
 

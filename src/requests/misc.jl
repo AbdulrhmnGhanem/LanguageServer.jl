@@ -1,12 +1,9 @@
-function cancel_notification(params::CancelParams, server::LanguageServerInstance, conn)
-end
+function cancel_notification(params::CancelParams, server::LanguageServerInstance, conn) end
 
-function setTrace_notification(params::SetTraceParams, server::LanguageServerInstance, conn)
-end
+function setTrace_notification(params::SetTraceParams, server::LanguageServerInstance, conn) end
 
 # TODO Provide type for params
-function setTraceNotification_notification(params, server::LanguageServerInstance, conn)
-end
+function setTraceNotification_notification(params, server::LanguageServerInstance, conn) end
 
 function julia_getCurrentBlockRange_request(tdpp::VersionedTextDocumentPositionParams, server::LanguageServerInstance, conn)
     fallback = (Position(0, 0), Position(0, 0), tdpp.position)
@@ -35,7 +32,7 @@ function julia_getCurrentBlockRange_request(tdpp::VersionedTextDocumentPositionP
                         thisline, _ = get_position_at(doc, loc + a.span)
                         if tdpp.position.line > thisline || headof(a) === :NOTHING
                             loc += a.fullspan
-                            a = x[i + 1]
+                            a = x[i+1]
                         end
                     end
                 end

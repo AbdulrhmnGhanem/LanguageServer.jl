@@ -15,7 +15,7 @@ end
 # lookup
 # ------
 
-traverse_by_name(f, cache = SymbolServer.stdlibs) = traverse_store!.(f, values(cache))
+traverse_by_name(f, cache=SymbolServer.stdlibs) = traverse_store!.(f, values(cache))
 
 traverse_store!(_, _) = return
 traverse_store!(f, store::SymbolServer.EnvStore) = traverse_store!.(f, values(store))
@@ -49,9 +49,9 @@ function uri2filepath(uri::AbstractString)
         # unc path: file://shares/c$/far/boo
         value = "//$host_unescaped$path_unescaped"
     elseif length(path_unescaped) >= 3 &&
-            path_unescaped[1] == '/' &&
-            isascii(path_unescaped[2]) && isletter(path_unescaped[2]) &&
-            path_unescaped[3] == ':'
+           path_unescaped[1] == '/' &&
+           isascii(path_unescaped[2]) && isletter(path_unescaped[2]) &&
+           path_unescaped[3] == ':'
         # windows drive letter: file:///c:/far/boo
         value = lowercase(path_unescaped[2]) * path_unescaped[3:end]
     else
@@ -143,9 +143,9 @@ function remove_workspace_files(root, server)
         get_open_in_editor(doc) && continue
         # If the file is in any other workspace folder, don't delete it
         any(folder -> startswith(fpath, folder), server.workspaceFolders) && continue
-            deletedocument!(server, uri)
-        end
+        deletedocument!(server, uri)
     end
+end
 
 
 function Base.getindex(server::LanguageServerInstance, r::Regex)
@@ -157,7 +157,7 @@ function Base.getindex(server::LanguageServerInstance, r::Regex)
 end
 
 function _offset_unitrange(r::UnitRange{Int}, first=true)
-    return r.start - 1:r.stop
+    return r.start-1:r.stop
 end
 
 function get_toks(doc, offset)
@@ -260,7 +260,7 @@ function get_expr(x, offset::UnitRange{Int}, pos=0, ignorewhitespace=false)
 end
 
 # full (not only trivia) expr containing rng, modulo whitespace
-function get_inner_expr(x, rng::UnitRange{Int}, pos=0, pos_span = 0)
+function get_inner_expr(x, rng::UnitRange{Int}, pos=0, pos_span=0)
     if all(pos .> rng)
         return nothing
     end
@@ -300,8 +300,8 @@ function get_expr1(x, offset, pos=0)
                 if offset == pos
                     if i == 1
                         return get_expr1(arg, offset, pos)
-                    elseif headof(x[i - 1]) === :IDENTIFIER
-                        return get_expr1(x[i - 1], offset, pos)
+                    elseif headof(x[i-1]) === :IDENTIFIER
+                        return get_expr1(x[i-1], offset, pos)
                     else
                         return get_expr1(arg, offset, pos)
                     end
@@ -312,8 +312,8 @@ function get_expr1(x, offset, pos=0)
                 if offset == pos
                     if i == 1
                         return get_expr1(arg, offset, pos)
-                    elseif headof(x[i - 1]) === :IDENTIFIER
-                        return get_expr1(x[i - 1], offset, pos)
+                    elseif headof(x[i-1]) === :IDENTIFIER
+                        return get_expr1(x[i-1], offset, pos)
                     else
                         return get_expr1(arg, offset, pos)
                     end
@@ -375,7 +375,7 @@ if VERSION < v"1.1" || Sys.iswindows() && VERSION < v"1.3"
         end
         return out
     end
-    _path_separator    = "\\"
+    _path_separator = "\\"
     _path_separator_re = r"[/\\]+"
     function _pathsep(paths::AbstractString...)
         for path in paths
@@ -388,11 +388,11 @@ if VERSION < v"1.1" || Sys.iswindows() && VERSION < v"1.3"
         isabspath(b) && return b
         A, a = _splitdrive(a)
         B, b = _splitdrive(b)
-        !isempty(B) && A != B && return string(B,b)
+        !isempty(B) && A != B && return string(B, b)
         C = isempty(B) ? A : B
-        isempty(a)                              ? string(C,b) :
-        occursin(_path_separator_re, a[end:end]) ? string(C,a,b) :
-                                                  string(C,a,_pathsep(a,b),b)
+        isempty(a) ? string(C, b) :
+        occursin(_path_separator_re, a[end:end]) ? string(C, a, b) :
+        string(C, a, _pathsep(a, b), b)
     end
     joinpath(a::AbstractString, b::AbstractString) = joinpath(String(a), String(b))
     joinpath(a, b, c, paths...) = joinpath(joinpath(a, b), c, paths...)
@@ -481,7 +481,7 @@ end
 function is_in_target_dir_of_package(pkgpath, target)
     try # Safe failure - attempts to read disc.
         spaths = splitpath(pkgpath)
-        if (i = findfirst(==(target), spaths)) !== nothing && "src" in readdir(joinpath(spaths[1:i - 1]...))
+        if (i = findfirst(==(target), spaths)) !== nothing && "src" in readdir(joinpath(spaths[1:i-1]...))
             return true
         end
         return false

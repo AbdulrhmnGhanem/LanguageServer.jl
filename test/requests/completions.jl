@@ -32,8 +32,7 @@ completion_test(line, char) = LanguageServer.textDocument_completion_request(Lan
     @test completion_test(6, 14).items[1].textEdit.range == LanguageServer.Range(6, 0, 6, 14)
 end
 
-@testset "path completions" begin
-end
+@testset "path completions" begin end
 
 @testset "import completions" begin
     settestdoc("import Base: r")

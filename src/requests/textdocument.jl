@@ -58,8 +58,7 @@ function textDocument_didSave_notification(params::DidSaveTextDocumentParams, se
 end
 
 
-function textDocument_willSave_notification(params::WillSaveTextDocumentParams, server::LanguageServerInstance, conn)
-end
+function textDocument_willSave_notification(params::WillSaveTextDocumentParams, server::LanguageServerInstance, conn) end
 
 
 function textDocument_willSaveWaitUntil_request(params::WillSaveTextDocumentParams, server::LanguageServerInstance, conn)
@@ -68,12 +67,12 @@ end
 
 comp(x, y) = x == y
 function comp(x::CSTParser.EXPR, y::CSTParser.EXPR)
-    comp(x.head, y.head) && 
-    x.span == y.span && 
-    x.fullspan == y.fullspan && 
-    x.val == y.val && 
-    length(x) == length(y) && 
-    all(comp(x[i], y[i]) for i = 1:length(x))
+    comp(x.head, y.head) &&
+        x.span == y.span &&
+        x.fullspan == y.fullspan &&
+        x.val == y.val &&
+        length(x) == length(y) &&
+        all(comp(x[i], y[i]) for i = 1:length(x))
 end
 
 function textDocument_didChange_notification(params::DidChangeTextDocumentParams, server::LanguageServerInstance, conn)
@@ -91,16 +90,16 @@ function textDocument_didChange_notification(params::DidChangeTextDocumentParams
         parse_all(doc, server)
     else
         cst0, cst1 = getcst(doc), CSTParser.parse(get_text(doc), true)
-        r1, r2, r3 = CSTParser.minimal_reparse(s0, get_text(doc), cst0, cst1, inds = true)
-        for i in setdiff(1:length(cst0.args), r1 , r3) # clean meta from deleted expr
+        r1, r2, r3 = CSTParser.minimal_reparse(s0, get_text(doc), cst0, cst1, inds=true)
+        for i in setdiff(1:length(cst0.args), r1, r3) # clean meta from deleted expr
             StaticLint.clear_meta(cst0[i])
         end
         setcst(doc, EXPR(cst0.head, EXPR[cst0.args[r1]; cst1.args[r2]; cst0.args[r3]], nothing))
         comp(cst1, getcst(doc)) || @error "File didn't update properly." # expensive check, remove
         sizeof(get_text(doc)) == getcst(doc).fullspan || @error "CST does not match input string length."
         headof(doc.cst) === :file ? set_doc(doc.cst, doc) : @info "headof(doc) isn't :file for $(doc._path)"
-        
-        target_exprs = getcst(doc).args[last(r1) .+ (1:length(r2))]
+
+        target_exprs = getcst(doc).args[last(r1).+(1:length(r2))]
         semantic_pass(getroot(doc), target_exprs)
         lint!(doc, server)
     end
@@ -165,7 +164,7 @@ function mark_errors(doc, out=Diagnostic[])
         while line < nlines
             seek(io, line_offsets[line])
             char = 0
-            while line_offsets[line] <= offset < line_offsets[line + 1]
+            while line_offsets[line] <= offset < line_offsets[line+1]
                 while offset > position(io)
                     c = read(io, Char)
                     if UInt32(c) >= 0x010000
@@ -212,8 +211,8 @@ Is this diagnostic reliant on the current environment being accurately represent
 """
 function is_diag_dependent_on_env(diag::Diagnostic)
     startswith(diag.message, "Missing reference: ") ||
-    startswith(diag.message, "Possible method call error") ||
-    startswith(diag.message, "An imported")
+        startswith(diag.message, "Possible method call error") ||
+        startswith(diag.message, "An imported")
 end
 
 
@@ -260,14 +259,14 @@ function parse_jmd(ps, str)
 
     for (startbyte, b) in blocks
         if CSTParser.ismacrocall(b) && headof(b.args[1]) === :globalrefcmd && headof(b.args[3]) === :TRIPLESTRING && (startswith(b.args[3].val, "julia") || startswith(b.args[3].val, "{julia"))
-            
+
             blockstr = b.args[3].val
             ps = CSTParser.ParseState(blockstr)
             # skip first line
             while ps.nt.startpos[1] == 1
                 CSTParser.next(ps)
             end
-            prec_str_size = currentbyte:startbyte + ps.nt.startbyte + 3
+            prec_str_size = currentbyte:startbyte+ps.nt.startbyte+3
 
             push!(top, EXPR(:STRING, length(prec_str_size), length(prec_str_size)))
 
@@ -282,14 +281,14 @@ function parse_jmd(ps, str)
             blockstr = b.args[3].val
             ps = CSTParser.ParseState(blockstr)
             CSTParser.next(ps)
-            prec_str_size = currentbyte:startbyte + ps.nt.startbyte + 1
+            prec_str_size = currentbyte:startbyte+ps.nt.startbyte+1
             push!(top, EXPR(:STRING, length(prec_str_size), length(prec_str_size)))
 
             args, ps = CSTParser.parse(ps, true)
             for a in args.args
                 push!(top, a)
             end
-            
+
             CSTParser.update_span!(top)
             currentbyte = top.fullspan + 1
         end
